@@ -3,18 +3,17 @@ import { telegramClient } from '@/client/telegram.ts';
 import { botsClient } from '@/client/bots.ts';
 
 const bots = ref();
-const currentBotId = ref();
+const currentBot = ref();
 
-const botDialogs = ref();
+const botDialogs = ref([]);
 const currentDialog = ref();
 
-onMounted(() => {
-  botsClient.getAll().then(res => {
-    bots.value = res;
-  });
-  telegramClient.getDialogs().then(res => {
-    botDialogs.value = res;
-  });
+onMounted(async () => {
+  bots.value = await botsClient.getAll();
+});
+
+watch(() => currentBot.value, async (bot) => {
+  botDialogs.value = await telegramClient.getDialogs(bot.id);
 });
 
 const formFields = useStorage('tg-form.fields', {
@@ -23,7 +22,8 @@ const formFields = useStorage('tg-form.fields', {
 });
 
 const sendTgMessage = async () => {
-  await telegramClient.send(
+  await telegramClient.sendMessage(
+      currentBot.value.id,
       formFields.value.peer,
       formFields.value.message,
   );
@@ -34,7 +34,7 @@ const sendTgMessage = async () => {
   <div class="h-[100vh] flex">
     <div class="h-[100vh] border-solid border-1">
       <Listbox
-          v-model="currentDialog"
+          v-model="currentBot"
           :options="bots"
           scroll-height="auto"
           class="h-[100vh]"
@@ -77,12 +77,6 @@ const sendTgMessage = async () => {
           </div>
         </template>
       </Listbox>
-      <!--
-            <div v-for="dialog in botDialogs">
-              {{ dialog.type }}
-            </div>
-            <pre>{{ botDialogs }}</pre>
-      -->
     </div>
     <div class="flex flex-col items-center gap-4 p-6 max-w-md mx-auto bg-white rounded-2xl shadow-lg">
       <h2 class="text-xl font-semibold">Send Telegram Message</h2>

@@ -14,6 +14,7 @@ class SendTelegramMessageRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'botId' => ['required', 'integer', 'exists:tg_bots,id'],
             'peer' => ['required', 'string'],
             'message' => ['required', 'string'],
         ];
