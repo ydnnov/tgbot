@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Console\Commands;
+namespace app\Console\Commands;
 
 use App\Services\BotService;
 use Illuminate\Console\Command;
 
-class TelegramBotStartOne extends Command
+class TelegramBotStopOne extends Command
 {
-    protected $signature = 'bot:start {--bot_id=}';
+    protected $signature = 'bot:stop {--bot_id=}';
 
-    protected $description = 'Run telegram bot';
+    protected $description = 'Stop telegram bot';
 
     public function handle(BotService $botService)
     {
@@ -19,8 +19,8 @@ class TelegramBotStartOne extends Command
             return;
         }
 
-        $botService->startBackground($botId);
+        $botService->stop($botId);
 
-        $this->info('Bot started');
+        $this->info('Bot stopped');
     }
 }

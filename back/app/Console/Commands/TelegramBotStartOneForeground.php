@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Console\Commands;
+namespace app\Console\Commands;
 
 use App\Services\BotService;
 use Illuminate\Console\Command;
 
-class TelegramBotStartOne extends Command
+class TelegramBotStartOneForeground extends Command
 {
-    protected $signature = 'bot:start {--bot_id=}';
+    protected $signature = 'bot:start-fg {--bot_id=}';
 
-    protected $description = 'Run telegram bot';
+    protected $description = 'Run telegram bot in foreground';
 
     public function handle(BotService $botService)
     {
@@ -19,8 +19,6 @@ class TelegramBotStartOne extends Command
             return;
         }
 
-        $botService->startBackground($botId);
-
-        $this->info('Bot started');
+        $botService->startForeground($botId);
     }
 }

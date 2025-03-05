@@ -2,7 +2,7 @@
 
 namespace app\Console\Commands;
 
-use App\Models\TgBot;
+use App\Services\BotService;
 use Illuminate\Console\Command;
 
 class TelegramBotList extends Command
@@ -11,18 +11,13 @@ class TelegramBotList extends Command
 
     protected $description = 'Show telegram bot s list';
 
-    public function handle()
+    public function handle(BotService $botService)
     {
-        // TODO add some ps aux command to look for bots that are really running and add this info to output
-        $bots = TgBot::all();
+        $statuses = $botService->getStatuses();
+
         $this->table(
-            ['id', 'username'],
-            $bots->map(function ($bot) {
-                return [
-                    'id' => $bot->id,
-                    'username' => $bot->username,
-                ];
-            })->toArray()
+            ['id', 'username', 'status'],
+            $statuses
         );
     }
 }
