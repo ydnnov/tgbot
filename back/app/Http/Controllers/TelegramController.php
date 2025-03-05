@@ -17,11 +17,23 @@ class TelegramController extends Controller
 
     public function sendMessage(SendTelegramMessageRequest $request)
     {
-        Queue::push(new SendTelegramMessage(
-            $request->input('botId'),
-            $request->input('peer'),
-            $request->input('message')
-        ));
+        $botId = $request->input('botId');
+        $peer = $request->input('peer');
+        $message = $request->input('message');
+
+        if (config('bot.actions_through_queue')) {
+            Queue::push(new SendTelegramMessage(
+                $botId,
+                $peer,
+                $message
+            ));
+        } else {
+            $madeline = $this->telegramService->getMadeline($botId);
+            $madeline->messages->sendMessage(
+                peer: $peer,
+                message: $message,
+            );
+        }
 
         return response()->json(['status' => 'Message sent!']);
     }

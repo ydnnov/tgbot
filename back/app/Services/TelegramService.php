@@ -2,6 +2,7 @@
 
 namespace app\Services;
 
+use App\Classes\BotEventHandler;
 use App\Models\TgBot;
 use danog\MadelineProto\API;
 use danog\MadelineProto\Settings;
@@ -10,6 +11,34 @@ use Illuminate\Support\Facades\Log;
 class TelegramService
 {
     public function getMadeline($botId)
+    {
+        [$settings, $bot, $sessionPath] = $this->makeMadelineConfig($botId);
+
+        if (file_exists($sessionPath)) {
+            Log::info("Using existing session (bot_id={$botId})");
+            $madeline = new API($sessionPath);
+            $madeline->start();
+        } else {
+            Log::info("Creating new session (bot_id={$botId})");
+            $madeline = new API($sessionPath, $settings);
+            $madeline->botLogin($bot->token);
+        }
+
+        return $madeline;
+    }
+
+    public function startBotListener($botId)
+    {
+        [$settings, $bot, $sessionPath] = $this->makeMadelineConfig($botId);
+
+        BotEventHandler::startAndLoopBot(
+            $sessionPath,
+            $bot->token,
+            $settings,
+        );
+    }
+
+    protected function makeMadelineConfig($botId)
     {
         $bot = TgBot::findOrFail($botId);
 
@@ -21,16 +50,6 @@ class TelegramService
 
         $sessionPath = storage_path("telegram.sessions/{$bot->username}");
 
-        if (file_exists($sessionPath)) {
-            Log::info('Using existing session');
-            $madeline = new API($sessionPath);
-            $madeline->start();
-        } else {
-            Log::info('Creating new session');
-            $madeline = new API($sessionPath, $settings);
-            $madeline->botLogin($bot->token);
-        }
-
-        return $madeline;
+        return [$settings, $bot, $sessionPath];
     }
 }

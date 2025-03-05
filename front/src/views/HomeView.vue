@@ -12,8 +12,11 @@ onMounted(async () => {
   bots.value = await botsClient.getAll();
 });
 
-watch(() => currentBot.value, async (bot) => {
-  botDialogs.value = await telegramClient.getDialogs(bot.id);
+watch(() => currentBot.value?.id, async (id) => {
+  if (!id) {
+    return;
+  }
+  botDialogs.value = await telegramClient.getDialogs(id);
 });
 
 const formFields = useStorage('tg-form.fields', {
@@ -22,7 +25,7 @@ const formFields = useStorage('tg-form.fields', {
 });
 
 const currentPeerId = computed(() => {
-  switch (currentDialog.value.type) {
+  switch (currentDialog.value?.type) {
     case 'user':
       return currentDialog.value.user_id;
     case 'channel':
