@@ -9,6 +9,8 @@ class TgBot extends Model
 {
     protected $fillable = ['username', 'token'];
 
+    protected $hidden = ['token'];
+
     public function setTokenAttribute($value)
     {
         $this->attributes['token'] = Crypt::encryptString($value);
